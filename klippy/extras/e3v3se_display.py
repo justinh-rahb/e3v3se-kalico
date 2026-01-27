@@ -535,6 +535,12 @@ class E3v3seDisplay:
         self.config = config
         self.mutex = self.printer.get_reactor().mutex()
         self.name = config.get_name()
+        if self.name != "e3v3se_display":
+            # This is a sub-section (like [e3v3se_display macro1])
+            # Consume all options so Klipper doesn't complain about "unused options"
+            for opt in config.get_prefix_options(""):
+                config.get(opt)
+            return
         self.reactor = self.printer.get_reactor()
         self._logging = config.getboolean("logging", False)
         self.gcode = self.printer.lookup_object("gcode")
@@ -542,6 +548,20 @@ class E3v3seDisplay:
         self.encoder_state = self.ENCODER_DIFF_NO
         language = config.get("language", "english")
         self.selected_language = self.languages[language]
+
+        # Collect custom buttons from sub-sections
+        self.custom_buttons = []
+        for s in config.get_prefix_sections(self.name + " "):
+            btn = {
+                "name": s.get_name().split()[-1],
+                "label": s.get("label", s.get_name().split()[-1]),
+                "icon": s.get("icon", None),
+                "gcode": s.get("gcode", None),
+            }
+            if btn["gcode"]:
+                self.custom_buttons.append(btn)
+        if self.custom_buttons:
+            self.log("Loaded %d custom buttons" % len(self.custom_buttons))
 
         # register for key events
         E3V3SEMenuKeys(config, self.key_event)
@@ -4002,4 +4022,8 @@ class E3v3seDisplay:
 
 
 def load_config(config):
+    return E3v3seDisplay(config)
+
+
+def load_config_prefix(config):
     return E3v3seDisplay(config)
