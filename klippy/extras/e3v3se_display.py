@@ -584,7 +584,15 @@ class E3v3seDisplay:
         self.checkkey = self.MainMenu
         self.pd = PrinterData(config)
 
-        self._update_interval = 1
+        # Refresh interval (seconds) for the status area. Each tick pulls the printer
+        # status into the display model and may redraw it; that redraw is the only
+        # periodic traffic on the display serial bridge. Knob/button input is
+        # event-driven (buttons.register_rotary_encoder / register_button_push)
+        # and is unaffected by this value, so a large interval still gives
+        # instant pause/resume and macro buttons.
+        self._update_interval = config.getfloat(
+            "update_interval", 1.0, minval=0.5
+        )
         self._update_timer = self.reactor.register_timer(self.EachMomentUpdate)
 
     def key_event(self, key, eventtime):

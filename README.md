@@ -134,6 +134,7 @@ language: english
 |--------|---------|-------------|
 | `language` | `english` | Display language (chinese, english, german, russian, french, turkish, spanish, italian, portuguese, japanese) |
 | `logging` | `False` | Enable debug logging for the display module |
+| `update_interval` | `1.0` | Seconds between status refreshes. Raise it (e.g. `60`) to cut the periodic traffic on the display serial bridge. Knob, button and macro input stay event-driven and are unaffected. |
 
 ### Custom Macro Buttons
 
